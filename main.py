@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 
 import client
@@ -6,14 +7,20 @@ import dotenv
 
 
 env = dotenv.load_dotenv() #load env
-discord = client.Gateway() #init discord gateway
+token = os.environ.get("DISCORD_TOKEN")
 
-discord.connect() #connect to ws://gateway.discord.gg
-discord.identify(os.environ.get("DISCORD_TOKEN")) #identify token
-discord.heartbeat(discord.heartbeat_interval) #start heartbeat loop
+gateway = client.Gateway() #init discord gateway
+user = client.User() #init discord http api
 
+gateway.connect() #connect to ws://gateway.discord.gg
+gateway.identify(token) #identify token
+gateway.heartbeat(gateway.heartbeat_interval) #start heartbeat loop
+
+user.identify(token) #identify user token
+
+ 
 #listen events from websocket
-@discord.listener("MESSAGE_CREATE") 
+@gateway.listener("MESSAGE_CREATE") 
 def new_message(event):
     name = event["d"]["author"]["username"] + "#" + event["d"]["author"]["discriminator"]
     message = event["d"]["content"]
@@ -21,12 +28,12 @@ def new_message(event):
     if message != "":
         print(f"{name} - {message}")
 
-@discord.listener("READY") 
+@gateway.listener("READY") 
 def ready(event):
     print("gateway ready!")
 
 
-discord.listen() #start event listen loop
+gateway.listen() #start event listen loop
 
 
 while True: #MainThread 

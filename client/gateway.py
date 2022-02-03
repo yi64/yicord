@@ -45,7 +45,7 @@ class Gateway():
                 "op": 1,
                 "d": self.seq
             })
-
+            
             time.sleep(delay/1000)
 
     def connect(self) -> None:
