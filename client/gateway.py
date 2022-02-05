@@ -18,7 +18,12 @@ class Gateway():
         self.heartbeat_interval: Union[None, int] = None
         self.uri: str = f"wss://gateway.discord.gg/?v={self.version}&encoding=json"
 
+        self.ready = False
         self.ws: websocket.WebSocket = websocket.WebSocket()
+
+    @property
+    def isReady(self):
+        return self.ready
 
     def recv_json(self) -> Union[dict, None]:
         try:
@@ -45,7 +50,7 @@ class Gateway():
                 "op": 1,
                 "d": self.seq
             })
-            
+
             time.sleep(delay/1000)
 
     def connect(self) -> None:
@@ -62,8 +67,8 @@ class Gateway():
                 "properties": {
                     "os": "Windows",
                     "os_version": "10",
-                    "browser": "Chrome",
-                    "device": "Desktop"
+                    "browser": "yicord-app",
+                    "device": "yicord-app"
                 }
             }
         })
@@ -91,6 +96,9 @@ class Gateway():
             if data != last:
                 if data:
                     self.seq = data["s"]
+
+                    if data["t"] == "READY":
+                        self.ready = True
 
                     for handler in self.handlers:
                         if data["t"] in handler["events"]:

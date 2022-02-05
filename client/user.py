@@ -10,6 +10,30 @@ class User(object):
 
         self.session: requests.Session = requests.Session()
 
+    def fetch_dms(self, ready_event) -> list:
+        dms = ready_event["d"]["private_channels"]
+
+        index = []
+        for dm in dms:
+            msg = dm["last_message_id"]
+
+            if msg:
+                index.append(int(msg))
+
+        index = sorted(index)
+        sort_dms = []
+
+        for i in index:
+            for dm in dms:
+                msg = dm["last_message_id"]
+
+                if msg:
+                    if int(msg) == i:
+                        sort_dms.append(dm)
+
+        return sort_dms
+
+
     def identify(self, token) -> bool:
         headers = {
             "content-type": "application/json",
